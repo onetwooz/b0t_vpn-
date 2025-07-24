@@ -1,0 +1,8 @@
+aiogram
+fastapi
+sqlalchemy
+psycopg2-binary
+APScheduler
+python-dotenv
+requests
+uvicorn 
