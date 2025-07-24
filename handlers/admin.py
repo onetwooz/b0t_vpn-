@@ -1,6 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from config import ADMIN_ID
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
 
@@ -298,3 +299,94 @@ async def cmd_maintenance_off(message: types.Message):
     if os.path.exists('maintenance_mode.flag'):
         os.remove('maintenance_mode.flag')
     await message.answer('Режим обслуживания ВЫКЛЮЧЕН. Покупки снова доступны.') 
+
+@router.message(Command('admin'))
+async def cmd_admin_panel(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        await message.answer('Доступ запрещён.')
+        return
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Пользователи", callback_data="adm_users")
+    kb.button(text="Ключи", callback_data="adm_keys")
+    kb.button(text="Платежи", callback_data="adm_payments")
+    kb.button(text="Экспорт", callback_data="adm_export")
+    kb.button(text="Статистика", callback_data="adm_stats")
+    kb.button(text="Обслуживание", callback_data="adm_maintenance")
+    kb.adjust(2)
+    await message.answer(
+        'Админ-панель. Выберите действие:',
+        reply_markup=kb.as_markup()
+    )
+
+@router.callback_query(lambda c: c.data == "adm_users")
+async def cb_adm_users(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_users(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_keys")
+async def cb_adm_keys(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_keys_server(callback.message) # Assuming cmd_adm_keys is a placeholder for cmd_adm_keys_server
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_payments")
+async def cb_adm_payments(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_payments(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_export")
+async def cb_adm_export(callback: types.CallbackQuery):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Экспорт пользователей", callback_data="adm_export_users")
+    kb.button(text="Экспорт ключей", callback_data="adm_export_keys")
+    kb.button(text="Экспорт платежей", callback_data="adm_export_payments")
+    kb.adjust(1)
+    await callback.message.edit_text('Выберите экспорт:', reply_markup=kb.as_markup())
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_export_users")
+async def cb_adm_export_users(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_export_users(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_export_keys")
+async def cb_adm_export_keys(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_export_keys(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_export_payments")
+async def cb_adm_export_payments(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_export_payments(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_stats")
+async def cb_adm_stats(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_adm_stats(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_maintenance")
+async def cb_adm_maintenance(callback: types.CallbackQuery):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Включить обслуживание", callback_data="adm_maintenance_on")
+    kb.button(text="Выключить обслуживание", callback_data="adm_maintenance_off")
+    kb.adjust(1)
+    await callback.message.edit_text('Режим обслуживания:', reply_markup=kb.as_markup())
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_maintenance_on")
+async def cb_adm_maintenance_on(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_maintenance_on(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "adm_maintenance_off")
+async def cb_adm_maintenance_off(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_maintenance_off(callback.message)
+    await callback.answer() 

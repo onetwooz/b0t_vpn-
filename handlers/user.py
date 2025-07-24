@@ -23,6 +23,8 @@ async def cmd_start(message: types.Message):
     kb.button(text="Мои ключи", callback_data="mykeys")
     kb.button(text="Профиль", callback_data="profile")
     kb.button(text="Помощь", callback_data="help")
+    kb.button(text="Отмена", callback_data="cancel")
+    kb.button(text="Поддержка", callback_data="support")
     kb.adjust(2)
     await message.answer(
         'Добро пожаловать! Это бот для покупки VPN-ключей.\n\n'
@@ -58,6 +60,18 @@ async def cb_profile(callback: types.CallbackQuery):
 async def cb_help(callback: types.CallbackQuery):
     await callback.message.delete_reply_markup()
     await cmd_help(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "cancel")
+async def cb_cancel(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete_reply_markup()
+    await cancel_handler(callback.message, state)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "support")
+async def cb_support(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_support(callback.message)
     await callback.answer()
 
 @router.message(Command('profile'))
