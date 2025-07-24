@@ -11,12 +11,54 @@ from utils.helpers import log_error
 from config import ADMIN_ID
 import os
 from aiogram import Bot
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
 
 @router.message(Command('start'))
 async def cmd_start(message: types.Message):
-    await message.answer('Добро пожаловать! Это бот для покупки VPN-ключей.')
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Купить ключ", callback_data="buy")
+    kb.button(text="Пробный ключ", callback_data="trial")
+    kb.button(text="Мои ключи", callback_data="mykeys")
+    kb.button(text="Профиль", callback_data="profile")
+    kb.button(text="Помощь", callback_data="help")
+    kb.adjust(2)
+    await message.answer(
+        'Добро пожаловать! Это бот для покупки VPN-ключей.\n\n'
+        'Выберите действие:',
+        reply_markup=kb.as_markup()
+    )
+
+@router.callback_query(lambda c: c.data == "buy")
+async def cb_buy(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete_reply_markup()
+    await cmd_buy(callback.message, state)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "trial")
+async def cb_trial(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_trial(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "mykeys")
+async def cb_mykeys(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_mykeys(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "profile")
+async def cb_profile(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_profile(callback.message)
+    await callback.answer()
+
+@router.callback_query(lambda c: c.data == "help")
+async def cb_help(callback: types.CallbackQuery):
+    await callback.message.delete_reply_markup()
+    await cmd_help(callback.message)
+    await callback.answer()
 
 @router.message(Command('profile'))
 async def cmd_profile(message: types.Message):
