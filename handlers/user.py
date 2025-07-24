@@ -10,6 +10,7 @@ from aiogram.filters import CommandObject
 from utils.helpers import log_error
 from config import ADMIN_ID
 import os
+from aiogram import Bot
 
 router = Router()
 
@@ -193,7 +194,7 @@ async def buy_confirm_payment(message: types.Message, state: FSMContext):
     await state.clear()
 
 @router.pre_checkout_query()
-async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery, bot: types.Bot):
+async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery, bot: Bot):
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 @router.message()
